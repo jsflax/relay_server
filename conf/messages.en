@@ -1,0 +1,3 @@
+user.exists.error = "Email already exists."
+user.does.not.exist.error = "User does not exist."
+user.invalid.password = "Invalid password."
