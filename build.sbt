@@ -1,3 +1,9 @@
+import sbtprotobuf.{ProtobufPlugin=>PB}
+
+Seq(PB.protobufSettings: _*)
+
+//javaSource in PB.protobufConfig <<= (scalaSource in Compile)
+
 name := "atlassian_relay"
 
 version := "1.0"

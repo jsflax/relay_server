@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package com.relay.proto;
+option java_package = "com.relay.proto";
+
+message MessageRequest {
+  uint32 channel_id = 1;
+  string raw_content = 2;
+  uint32 timestamp = 3;
+  uint32 user_id = 4;
+}
+
+message MessageSpan {
+  enum SpanType {
+	RAW = 0;
+	MENTION = 1;
+	EMOTICON = 2;
+	LINK = 3;
+  }
+
+  SpanType span_type = 1;
+  string span = 2;
+}
+
+message MessageResponse {
+  uint32 channel_id = 1;
+  string raw_content = 2;
+  repeated string mentions = 3;
+  repeated string emoticons = 4;
+  repeated string links = 5;
+  repeated MessageSpan rich_content = 6;
+  string username = 7;
+  string avatar_url = 8;
+  uint32 timestamp = 9;
+}
