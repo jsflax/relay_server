@@ -2,7 +2,7 @@ package service
 
 import java.io.File
 
-import model.{ServiceResponse, StatusCode, User, UserRequest}
+import model._
 import play.api.i18n.Messages
 import scalikejdbc._
 
@@ -10,9 +10,7 @@ import scala.annotation.tailrec
 import util.BCrypt
 
 import scala.util.Random
-
 import model.UserProtocol._
-
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 
@@ -22,8 +20,8 @@ import play.api.i18n.Messages.Implicits._
 object UserService {
   implicit val session = AutoSession
 
-  val column = User.column
-  val u = User.u
+  val column = UserProtocol.column
+  val u = UserProtocol.u
 
   sql"""
       CREATE TABLE IF NOT EXISTS user (
@@ -77,10 +75,10 @@ object UserService {
   ).map(name => s"img/$name")
 
 
-  def create(user: UserRequest): ServiceResponse[Option[String]] = {
+  def create(user: UserCreateRequest): ServiceResponse[Option[String]] = {
     withSQL {
-      select.from(User as u).where.eq(u.id, user.email)
-    }.map(rs => User(rs)).single().apply() match {
+      select.from(UserProtocol as u).where.eq(u.email, user.email)
+    }.map(rs => UserProtocol(rs)).single().apply() match {
       case Some(_) =>
         ServiceResponse[Option[String]](
           StatusCode.Unauthorized,
@@ -91,9 +89,9 @@ object UserService {
           StatusCode.OK,
           withSQL {
             insert
-              .into(User)
+              .into(UserProtocol)
               .namedValues(
-                column.name -> user.name.orNull,
+                column.name -> user.name,
                 column.email -> user.email,
                 column.avatarUrl -> defaultAvatars(
                   new Random().nextInt(defaultAvatars.length)
@@ -111,8 +109,8 @@ object UserService {
   }
 
   def read(userId: Long): User = withSQL {
-    select.from(User as u).where.eq(u.id, userId)
-  }.map(rs => User(rs)).single().apply().orNull
+    select.from(UserProtocol as u).where.eq(u.id, userId)
+  }.map(rs => UserProtocol(rs)).single().apply().orNull
 
   def readByToken(token: String): ServiceResponse[User] =
     TokenService.findByToken(token) match {
@@ -128,12 +126,12 @@ object UserService {
         )
     }
 
-  def readByEmailAndPassword(params: UserRequest): ServiceResponse[User] =
+  def readByEmailAndPassword(params: UserLoginRequest): ServiceResponse[User] =
     withSQL {
       select
-        .from(User as u)
+        .from(UserProtocol as u)
         .where.eq(u.email, params.email)
-    }.map(rs => User(rs)).single().apply() match {
+    }.map(rs => UserProtocol(rs)).single().apply() match {
       case Some(user) =>
         if (BCrypt.checkpw(params.password, user.hash)) {
           ServiceResponse(
@@ -158,7 +156,7 @@ object UserService {
     userResp.statusCode match {
       case StatusCode.OK =>
         withSQL {
-          val updateImpl = update(User)
+          val updateImpl = update(UserProtocol as u)
           fields.foldLeft(updateImpl) {
             (query, field) =>
               query.set(column.column(field._1) -> field._2)

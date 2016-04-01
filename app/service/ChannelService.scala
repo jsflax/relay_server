@@ -1,8 +1,7 @@
 package service
 
-import model.{Channel, ServiceResponse, StatusCode}
+import model.{Channel, ChannelProtocol, ServiceResponse, StatusCode}
 import scalikejdbc._
-import model.ChannelProtocol._
 
 /**
   * Created by jasonflax on 2/18/16.
@@ -10,8 +9,8 @@ import model.ChannelProtocol._
 object ChannelService {
   implicit val session = AutoSession
 
-  private lazy val column = Channel.column
-  private lazy val c = Channel.c
+  private lazy val column = ChannelProtocol.column
+  private lazy val c = ChannelProtocol.c
 
   sql"""
         CREATE TABLE IF NOT EXISTS channel (
@@ -49,7 +48,7 @@ object ChannelService {
     ServiceResponse(
       StatusCode.OK,
       withSQL {
-        insert.into(Channel).namedValues(
+        insert.into(ChannelProtocol).namedValues(
           column.name -> channel.name,
           column.creatorId -> channel.creatorId,
           column.description -> channel.description
@@ -59,8 +58,8 @@ object ChannelService {
 
   def read(channelId: String): ServiceResponse[Channel] = {
     val channelOpt = withSQL {
-      select.from(Channel as c).where.eq(c.id, channelId)
-    }.map(rs => Channel(rs)).single().apply()
+      select.from(ChannelProtocol as c).where.eq(c.id, channelId)
+    }.map(rs => ChannelProtocol(rs)).single().apply()
 
     channelOpt match {
       case Some(channel) =>
@@ -79,7 +78,7 @@ object ChannelService {
     ServiceResponse(
       StatusCode.OK,
       withSQL {
-        select.from(Channel as c)
-      }.map(rs => Channel(rs)).list().apply()
+        select.from(ChannelProtocol as c)
+      }.map(rs => ChannelProtocol(rs)).list().apply()
     )
 }

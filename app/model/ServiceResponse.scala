@@ -23,10 +23,10 @@ import play.api.libs.json.Writes
   * and then serialized and passed to the client.
   *
   * @param statusCode from enum StatusCode
-  * @param data    data to return on success
+  * @param data       data to return on success
   * @param message    message on error
   * @tparam A class to be serialized and returned
   */
-case class ServiceResponse[A: Writes](statusCode: StatusCode,
-                                      data: A = null,
-                                      message: String = null)
+case class ServiceResponse[A](statusCode: StatusCode,
+                              data: A = null,
+                              message: String = null)
