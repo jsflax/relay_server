@@ -10,9 +10,10 @@ GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 # Channels API
 GET     /channels/                  @controllers.ChannelController.readAll
-GET     /channels/{id}              @controllers.ChannelController.read(id)
-
 PUT     /channels/                  @controllers.ChannelController.create
+
+GET     /channels/{id}/             @controllers.ChannelController.read(id)
+POST    /channels/{id}/             @controllers.ChannelController.subscribe(id)
 
 # Users API
 POST    /users/                     @controllers.UserController.login

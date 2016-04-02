@@ -1,17 +1,20 @@
 package model
 
-import play.api.libs.json.Json
 import scalikejdbc._
 import scalikejdbc.WrappedResultSet
+
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 
 /**
   * Datum for users that must create accounts
   * to access the API
   *
-  * @param id unique ID of user
-  * @param name username
-  * @param email email user signs up with
-  * @param hash password hash
+  * @param id        unique ID of user
+  * @param name      username
+  * @param email     email user signs up with
+  * @param avatarUrl url of avatar
+  * @param token     password hash
   *
   * @author jsflax on 3/30/16.
   */
@@ -19,7 +22,8 @@ case class User(id: Long,
                 name: String,
                 email: String,
                 avatarUrl: String,
-                hash: String)
+                hash: String,
+                token: String)
 
 case class UserCreateRequest(email: String,
                              password: String,
@@ -29,7 +33,16 @@ case class UserLoginRequest(email: String,
                             password: String)
 
 object UserProtocol extends SQLSyntaxSupport[User] {
-  implicit val uProtocol = Json.format[User]
+  implicit val uProtocolWrites = (
+    (JsPath \ 'id).write[Long] and
+    (JsPath \ 'name).write[String] and
+    (JsPath \ 'email).write[String] and
+    (JsPath \ 'avatarUrl).write[String] and
+    (JsPath \ 'token).write[String]
+  ) (unlift { (user: User) =>
+    Some(user.id, user.name, user.email, user.avatarUrl, user.token)
+  })
+
   implicit val userCreateRequestProtocol = Json.format[UserCreateRequest]
   implicit val userLoginRequestProtocol = Json.format[UserLoginRequest]
 
@@ -41,6 +54,7 @@ object UserProtocol extends SQLSyntaxSupport[User] {
     rs.string(u.resultName.name),
     rs.string(u.resultName.email),
     rs.string(u.resultName.avatarUrl),
-    rs.string(u.resultName.hash)
+    rs.string(u.resultName.hash),
+    rs.string(Token.t.resultName.value)
   )
 }

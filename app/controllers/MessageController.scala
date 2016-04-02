@@ -1,7 +1,5 @@
 package controllers
 
-import java.net.URL
-
 import akka.actor.{Actor, ActorRef}
 import model.{Link, MessageRequest, MessageResponse}
 import play.api.libs.json.JsValue
@@ -23,13 +21,16 @@ object ChatActor {
     val (rawStrippedMentionsAndEmoticons, emoticons) =
       parseEmoticons(rawStrippedMentions)
 
+    val (rawStrippedFinal, links) =
+      parseLinks(rawStrippedMentionsAndEmoticons)
+
     MessageResponse(
       messageRequest.channelId,
       messageRequest.rawContent,
       mentions,
       emoticons,
-      Seq(),
-      rawStrippedMentionsAndEmoticons,
+      links,
+      rawStrippedFinal,
       messageRequest.username,
       messageRequest.avatarUrl,
       messageRequest.time
@@ -91,13 +92,14 @@ object ChatActor {
 class ChatActor(out: ActorRef,
                 dispatcher: (MessageResponse) => Unit) extends Actor {
 
-
   def receive = {
     case msg: JsValue =>
 
   }
 }
 
-class MessageController extends BaseController {
-  val channelActorMap = mutable.Map[Long, ChatActor]()
+object MessageController extends BaseController {
+  val actorMap = mutable.Map[Long, ChatActor]()
+
+  val channelActorMap = mutable.Map[Long, ListBuffer[ChatActor]]()
 }

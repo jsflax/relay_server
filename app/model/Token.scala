@@ -1,9 +1,8 @@
 package model
 
+import play.api.libs.json.Json
 import scalikejdbc._
 
-/**
-  */
 /**
   * Expiring token granted to a user to allow temporary access to the API.
   * Will be refreshed upon use. Tokens only expire after not being used
@@ -24,8 +23,13 @@ case class Token(id: Long,
   def isExpired = System.currentTimeMillis > expires
 }
 
+case class SimpleToken(token: String)
+
 object Token extends SQLSyntaxSupport[Token] {
+  implicit val tsProtocol = Json.format[SimpleToken]
+
   override val tableName = "token"
+
   lazy val t = Token.syntax("token")
 
   def apply(rs: WrappedResultSet): Token = new Token(

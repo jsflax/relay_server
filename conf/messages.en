@@ -1,3 +1,5 @@
 user.exists.error = "Email already exists."
 user.does.not.exist.error = "User does not exist."
 user.invalid.password = "Invalid password."
+user.not.connected.error = "User is not connected to chat. \
+  You must connect to the WebSocket first."

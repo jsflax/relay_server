@@ -11,8 +11,8 @@ import play.api.mvc.{Controller, Request, Result}
   */
 trait BaseController extends Controller {
 
-  def dispatchValidServiceResponse[B: Writes]
-    (response: ServiceResponse[B]): Result = {
+  def renderServiceResponse[B: Writes]
+  (response: ServiceResponse[B]): Result = {
     // check status code and serialize return data, then return to client
     response.statusCode match {
       case StatusCode.OK =>
@@ -23,12 +23,31 @@ trait BaseController extends Controller {
           )
         )
       case _ =>
-        BadRequest(Json.obj(
+        Ok(Json.obj(
           "status" -> response.statusCode,
           "message" -> response.message
         ))
     }
   }
+
+  def renderBadValidationResponse(jsError: JsError): Result =
+    Ok(
+      Json.obj(
+        "status" -> StatusCode.ImproperParameters,
+        "message" -> JsError.toJson(jsError)
+      )
+    )
+
+  /**
+    * Validate that the body of the request can be de-serialized
+    * into some class of type A
+    *
+    * @param request request object from client
+    * @tparam A json-coercable domain
+    * @return result of validation
+    */
+  def validateModel[A: Reads](request: Request[JsValue]): JsResult[A] =
+    request.body.as[JsObject].validate[A]
 
   /**
     * Dispatch result to client
@@ -42,21 +61,17 @@ trait BaseController extends Controller {
     *         data of type @tparam B on success
     */
   def validateModelAndFetchResult[A: Reads, B: Writes]
-    (serviceMethod: A => ServiceResponse[B])
-    (implicit request: Request[JsValue]) = {
+  (serviceMethod: A => ServiceResponse[B])
+  (implicit request: Request[JsValue]) = {
     // validate that the body of the request can be de-serialized
     // into some class of type A
-    val validationResult = request.body.as[JsObject].validate[A]
+    val validationResult = validateModel(request)
     validationResult.isSuccess match {
       case true =>
         // call method with passed object
-        dispatchValidServiceResponse(serviceMethod(validationResult.get))
+        renderServiceResponse(serviceMethod(validationResult.get))
       case false =>
-        BadRequest(
-          Json.obj(
-            "status" -> StatusCode.ImproperParameters,
-            "message" -> JsError.toJson(validationResult.asInstanceOf[JsError])
-        ))
+        renderBadValidationResponse(validationResult.asInstanceOf[JsError])
     }
   }
 }

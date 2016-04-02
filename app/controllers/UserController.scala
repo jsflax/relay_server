@@ -11,7 +11,7 @@ import model.UserProtocol._
   */
 class UserController extends BaseController {
   def create = Action(parse.json) { implicit request =>
-    validateModelAndFetchResult[UserCreateRequest, Option[String]](UserService.create)
+    validateModelAndFetchResult[UserCreateRequest, Option[User]](UserService.create)
   }
 
   def login = Action(parse.json) { implicit request =>

@@ -9,7 +9,9 @@ case class Channel(id: Int,
                    dateCreated: Long,
                    description: String)
 
-case class ChannelCreateRequest(creatorId: Int,
+case class ChannelSubscribeRequest(token: String)
+
+case class ChannelCreateRequest(token: String,
                                 name: String,
                                 description: String)
 
@@ -23,10 +25,10 @@ object ChannelProtocol extends SQLSyntaxSupport[Channel] {
 
   def apply(rs: WrappedResultSet): Channel =
     Channel(
-      rs int c.id,
-      rs int c.creatorId,
-      rs string c.name,
-      rs long c.dateCreated,
-      rs string c.description
+      rs int c.resultName.id,
+      rs int c.resultName.creatorId,
+      rs string c.resultName.name,
+      rs long c.resultName.dateCreated,
+      rs string c.resultName.description
     )
 }

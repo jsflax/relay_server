@@ -22,6 +22,7 @@ object UserService {
 
   val column = UserProtocol.column
   val u = UserProtocol.u
+  val t = Token.t
 
   sql"""
       CREATE TABLE IF NOT EXISTS user (
@@ -72,19 +73,25 @@ object UserService {
     new File("./public/images")
   ).filter(
     _.getName.startsWith("dart_monkey")
-  ).map(name => s"img/$name")
+  ).map(name => s"assets/images/${name.getName}")
 
 
-  def create(user: UserCreateRequest): ServiceResponse[Option[String]] = {
+  def create(user: UserCreateRequest): ServiceResponse[Option[User]] = {
     withSQL {
       select.from(UserProtocol as u).where.eq(u.email, user.email)
     }.map(rs => UserProtocol(rs)).single().apply() match {
       case Some(_) =>
-        ServiceResponse[Option[String]](
+        ServiceResponse[Option[User]](
           StatusCode.Unauthorized,
           message = Messages("user.exists.error")
         )
       case _ =>
+        val avatarUrl = defaultAvatars(
+          new Random().nextInt(defaultAvatars.length)
+        )
+        val pwHash = BCrypt.hashpw(
+          user.password, BCrypt.gensalt()
+        )
         ServiceResponse(
           StatusCode.OK,
           withSQL {
@@ -93,23 +100,32 @@ object UserService {
               .namedValues(
                 column.name -> user.name,
                 column.email -> user.email,
-                column.avatarUrl -> defaultAvatars(
-                  new Random().nextInt(defaultAvatars.length)
-                ),
-                column.hash -> BCrypt.hashpw(
-                  user.password, BCrypt.gensalt()
-                )
+                column.avatarUrl -> avatarUrl,
+                column.hash -> pwHash
               )
           }.updateAndReturnGeneratedKey().apply() match {
-            case l if l > 0 => Some(TokenService.create(l))
+            case l if l > 0 =>
+              Some(
+                User(
+                  l,
+                  user.name,
+                  user.email,
+                  avatarUrl,
+                  pwHash,
+                  TokenService.create(l)
+                )
+              )
             case _ => None
           }
         )
     }
   }
 
-  def read(userId: Long): User = withSQL {
-    select.from(UserProtocol as u).where.eq(u.id, userId)
+  private def read(userId: Long): User = withSQL {
+    select.from(UserProtocol as u)
+      .join(Token as t)
+      .where.eq(u.id, userId)
+      .and.eq(t.userId, userId)
   }.map(rs => UserProtocol(rs)).single().apply().orNull
 
   def readByToken(token: String): ServiceResponse[User] =
@@ -130,7 +146,9 @@ object UserService {
     withSQL {
       select
         .from(UserProtocol as u)
+        .join(Token as t)
         .where.eq(u.email, params.email)
+        .and.eq(u.id, t.userId)
     }.map(rs => UserProtocol(rs)).single().apply() match {
       case Some(user) =>
         if (BCrypt.checkpw(params.password, user.hash)) {
