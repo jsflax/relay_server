@@ -58,10 +58,9 @@ object ChannelService {
           }.updateAndReturnGeneratedKey().apply()
         )
       case None =>
-        ServiceResponse[Long](
+        ServiceResponse(
           StatusCode.Unauthorized,
-          message = "user not found",
-          data = null
+          data = -1
         )
     }
   }
