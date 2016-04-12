@@ -47,7 +47,7 @@ object ChannelService {
   def create(channel: ChannelCreateRequest): ServiceResponse[Long] = {
     TokenService.findByToken(channel.token) match {
       case Some(user) =>
-        ServiceResponse(
+        ServiceResponse[Long](
           StatusCode.OK,
           withSQL {
             insert.into(ChannelProtocol).namedValues(
