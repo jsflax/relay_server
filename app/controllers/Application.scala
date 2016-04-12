@@ -5,7 +5,7 @@ import java.sql.{DriverManager, SQLException}
 
 import play.api._
 import play.api.mvc._
-import scalikejdbc.{AutoSession, ConnectionPool, GlobalSettings, LoggingSQLAndTimeSettings}
+import scalikejdbc.{AutoSession, ConnectionPool, ConnectionPoolSettings, GlobalSettings, LoggingSQLAndTimeSettings}
 
 /**
   */
@@ -37,7 +37,11 @@ object SqlDB {
     ConnectionPool.singleton(
       dbUrl,
       username,
-      password
+      password,
+      ConnectionPoolSettings(
+        initialSize = 1,
+        maxSize = 8
+      )
     )
 
     try {
