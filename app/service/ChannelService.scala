@@ -29,7 +29,7 @@ object ChannelService {
           user_id INT
         )
     """.execute().apply()
-
+  
   sql"""
         SHOW TRIGGERS LIKE 'channel'
     """.map(rs => rs).list.apply().isEmpty match {
