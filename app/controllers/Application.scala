@@ -28,15 +28,15 @@ object SqlDB {
     )
     ConnectionPool.singleton(
       s"mysql://b3f1a36cc6c8ab:1e35fa46@us-cdbr-iron-east-03.cleardb.net/heroku_e50a796d2ce0a5c?reconnect=true",
-      "root",
-      "root"
+      "",
+      ""
     )
 
     try {
       val connection = DriverManager.getConnection(
         s"mysql://b3f1a36cc6c8ab:1e35fa46@us-cdbr-iron-east-03.cleardb.net/heroku_e50a796d2ce0a5c?reconnect=true",
-        "root",
-        "root"
+        "",
+        ""
       )
       connection.prepareStatement(
         s"CREATE DATABASE IF NOT EXISTS relay"
