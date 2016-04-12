@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject.Inject
 
-import model.{Channel, ServiceResponse, SimpleUuid, StatusCode}
+import model._
 import play.api.mvc.Action
 import service.{ChannelService, TokenService}
 import model.ChannelProtocol._
@@ -16,7 +16,8 @@ class ChannelController @Inject() (messageController: MessageController)
   extends BaseController {
 
   def create = Action(parse.json) { implicit request =>
-    validateModelAndFetchResult[Channel, Long](ChannelService.create)
+    validateModelAndFetchResult[ChannelCreateRequest, Long]
+      (ChannelService.create)
   }
 
   def readAll = Action { implicit request =>

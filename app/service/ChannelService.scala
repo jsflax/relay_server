@@ -1,6 +1,6 @@
 package service
 
-import model.{Channel, ChannelProtocol, ServiceResponse, StatusCode}
+import model._
 import scalikejdbc._
 
 /**
@@ -29,7 +29,7 @@ object ChannelService {
           user_id INT
         )
     """.execute().apply()
-  
+
   sql"""
         SHOW TRIGGERS LIKE 'channel'
     """.map(rs => rs).list.apply().isEmpty match {
@@ -44,17 +44,27 @@ object ChannelService {
     case _ =>
   }
 
-  def create(channel: Channel): ServiceResponse[Long] =
-    ServiceResponse(
-      StatusCode.OK,
-      withSQL {
-        insert.into(ChannelProtocol).namedValues(
-          column.name -> channel.name,
-          column.creatorId -> channel.creatorId,
-          column.description -> channel.description
+  def create(channel: ChannelCreateRequest): ServiceResponse[Long] = {
+    TokenService.findByToken(channel.token) match {
+      case Some(user) =>
+        ServiceResponse(
+          StatusCode.OK,
+          withSQL {
+            insert.into(ChannelProtocol).namedValues(
+              column.name -> channel.name,
+              column.creatorId -> user.id,
+              column.description -> channel.description
+            )
+          }.updateAndReturnGeneratedKey().apply()
         )
-      }.updateAndReturnGeneratedKey().apply()
-    )
+      case None =>
+        ServiceResponse[Long](
+          StatusCode.Unauthorized,
+          message = "user not found",
+          data = null
+        )
+    }
+  }
 
   def read(channelId: Long): ServiceResponse[Channel] = {
     val channelOpt = withSQL {

@@ -12,7 +12,7 @@ GET     /assets/avatars/*file       controllers.Assets.at(path="/public/images/a
 
 # Channels API
 GET     /channels                  @controllers.ChannelController.readAll
-PUT     /channels/                 @controllers.ChannelController.create
+PUT     /channels                    @controllers.ChannelController.create
 
 GET     /channels/:id              @controllers.ChannelController.read(id: Long)
 POST    /channels/:id              @controllers.ChannelController.subscribe(id)
