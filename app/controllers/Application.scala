@@ -45,17 +45,17 @@ object SqlDB {
     )
 
     try {
-      val connection = DriverManager.getConnection(
-        dbUrl,
-        username,
-        password
-      )
-      connection.prepareStatement(
-        s"CREATE DATABASE IF NOT EXISTS relay"
-      ).executeUpdate()
-      connection.prepareStatement(
-        s"use relay"
-      ).execute()
+//      val connection = DriverManager.getConnection(
+//        dbUrl,
+//        username,
+//        password
+//      )
+//      connection.prepareStatement(
+//        s"CREATE DATABASE IF NOT EXISTS relay"
+//      ).executeUpdate()
+//      connection.prepareStatement(
+//        s"use relay"
+//      ).execute()
 
       isInitialized = true
     } catch {
