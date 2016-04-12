@@ -27,14 +27,14 @@ object SqlDB {
       warningLogLevel = 'warn
     )
     ConnectionPool.singleton(
-      s"jdbc:mysql://localhost:3306/relay",
+      s"mysql://b3f1a36cc6c8ab:1e35fa46@us-cdbr-iron-east-03.cleardb.net/heroku_e50a796d2ce0a5c?reconnect=true",
       "root",
       "root"
     )
 
     try {
       val connection = DriverManager.getConnection(
-        s"jdbc:mysql://localhost:3306/relay",
+        s"mysql://b3f1a36cc6c8ab:1e35fa46@us-cdbr-iron-east-03.cleardb.net/heroku_e50a796d2ce0a5c?reconnect=true",
         "root",
         "root"
       )
