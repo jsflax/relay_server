@@ -59,9 +59,11 @@ object SqlDB {
 
       isInitialized = true
     } catch {
-      case e: SQLException => Logger.error(
-        s"Failed to initialize SqlDB: ${e.getMessage}"
-      )
+      case e: SQLException =>
+        Logger.error(
+          s"Failed to initialize SqlDB: ${e.getMessage}"
+        )
+        e.printStackTrace()
     }
   }
 }
