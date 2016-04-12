@@ -1,5 +1,6 @@
 package controllers
 
+import java.net.URI
 import java.sql.{DriverManager, SQLException}
 
 import play.api._
@@ -26,17 +27,24 @@ object SqlDB {
       warningThresholdMillis = 3000L,
       warningLogLevel = 'warn
     )
+
+    val dbUri = new URI(System.getenv("CLEARDB_DATABASE_URL"))
+
+    val username = dbUri.getUserInfo.split(":")(0)
+    val password = dbUri.getUserInfo.split(":")(1)
+    val dbUrl = "jdbc:mysql://" + dbUri.getHost + dbUri.getPath
+
     ConnectionPool.singleton(
-      s"mysql://b3f1a36cc6c8ab:1e35fa46@us-cdbr-iron-east-03.cleardb.net/heroku_e50a796d2ce0a5c?reconnect=true",
-      "",
-      ""
+      dbUrl,
+      username,
+      password
     )
 
     try {
       val connection = DriverManager.getConnection(
-        s"mysql://b3f1a36cc6c8ab:1e35fa46@us-cdbr-iron-east-03.cleardb.net/heroku_e50a796d2ce0a5c?reconnect=true",
-        "",
-        ""
+        dbUrl,
+        username,
+        password
       )
       connection.prepareStatement(
         s"CREATE DATABASE IF NOT EXISTS relay"
