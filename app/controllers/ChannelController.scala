@@ -16,7 +16,7 @@ class ChannelController @Inject() (messageController: MessageController)
   extends BaseController {
 
   def create = Action(parse.json) { implicit request =>
-    validateModelAndFetchResult[ChannelCreateRequest, Long](
+    validateModelAndFetchResult[ChannelCreateRequest, Channel](
       ChannelService.create
     )
   }

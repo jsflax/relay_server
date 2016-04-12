@@ -44,23 +44,25 @@ object ChannelService {
     case _ =>
   }
 
-  def create(channel: ChannelCreateRequest): ServiceResponse[Long] = {
+  def create(channel: ChannelCreateRequest): ServiceResponse[Channel] = {
     TokenService.findByToken(channel.token) match {
       case Some(user) =>
-        ServiceResponse[Long](
+        ServiceResponse(
           StatusCode.OK,
           withSQL {
-            insert.into(ChannelProtocol).namedValues(
-              column.name -> channel.name,
-              column.creatorId -> user.id,
-              column.description -> channel.description
-            )
-          }.updateAndReturnGeneratedKey().apply()
+            select.from(ChannelProtocol as c).where.eq(c.id,
+              withSQL {
+                insert.into(ChannelProtocol).namedValues(
+                  column.name -> channel.name,
+                  column.creatorId -> user.id,
+                  column.description -> channel.description
+                )
+              }.updateAndReturnGeneratedKey().apply())
+          }.map(rs => ChannelProtocol(rs)).single().apply().orNull
         )
       case None =>
-        ServiceResponse(
-          StatusCode.Unauthorized,
-          data = -1
+        ServiceResponse[Channel](
+          StatusCode.Unauthorized
         )
     }
   }
