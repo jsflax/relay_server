@@ -23,10 +23,10 @@ case class Token(id: Long,
   def isExpired = System.currentTimeMillis > expires
 }
 
-case class SimpleToken(token: String)
+case class SimpleUuid(uuid: String)
 
 object Token extends SQLSyntaxSupport[Token] {
-  implicit val tsProtocol = Json.format[SimpleToken]
+  implicit val tsProtocol = Json.format[SimpleUuid]
 
   override val tableName = "token"
 

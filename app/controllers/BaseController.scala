@@ -19,7 +19,13 @@ trait BaseController extends Controller {
         Ok(
           Json.obj(
             "status" -> response.statusCode,
-            "data" -> Json.toJson(response.data)
+            "data" -> {
+              if (response.data == null) {
+                JsObject(Seq())
+              } else {
+                Json.toJson(response.data)
+              }
+            }
           )
         )
       case _ =>

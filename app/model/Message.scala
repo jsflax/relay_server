@@ -7,7 +7,7 @@ import play.api.libs.functional.syntax._
 case class MessageRequest(channelId: Int,
                           rawContent: String,
                           time: Long,
-                          userId: Long,
+                          userId: Int,
                           username: String,
                           avatarUrl: String)
 
@@ -24,6 +24,7 @@ case class Link(link: String, title: String)
   * @author jsflax on 3/31/16.
   */
 case class MessageResponse(channelId: Int,
+                           userId: Int,
                            rawContent: String,
                            mentions: Seq[String],
                            emoticons: Seq[String],
@@ -35,4 +36,6 @@ case class MessageResponse(channelId: Int,
 
 object MessageProtocol {
   implicit val lJson = Json.format[Link]
+  implicit val mJson = Json.format[MessageRequest]
+  implicit val mrJson = Json.format[MessageResponse]
 }

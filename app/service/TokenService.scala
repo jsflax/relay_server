@@ -3,7 +3,7 @@ package service
 import java.math.BigInteger
 import java.security.SecureRandom
 
-import model.Token
+import model.{Token, UserProtocol}
 import scalikejdbc._
 
 import scala.util.Random
@@ -17,6 +17,7 @@ object TokenService {
   private lazy val random = new SecureRandom()
   private lazy val column = Token.column
   private lazy val t = Token.t
+  private lazy val u = UserProtocol.u
   private lazy val oneHourMillis = 3600000L
 
   val min = 200
@@ -67,8 +68,11 @@ object TokenService {
   }.map(rs => Token(rs)).single().apply()
 
   def findByToken(tokenValue: String) = withSQL {
-    select.from(Token as t).where.eq(t.value, tokenValue)
-  }.map(rs => Token(rs)).single().apply()
+    select.from(Token as t)
+      .join(UserProtocol as u)
+      .where.eq(t.value, tokenValue)
+      .and.eq(t.userId, u.id)
+  }.map(rs => UserProtocol(rs)).single().apply()
 
   def findByUserId(userId: Long) = withSQL {
     select.from(Token as t).where.eq(t.userId, userId)

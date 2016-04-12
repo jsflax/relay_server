@@ -3,18 +3,23 @@
 # ~~~~
 
 # Home page
-GET     /                           @controllers.Application.index
+GET     /                          @controllers.Application.index
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
+# GET     /assets/*file              controllers.Assets.at(path="/public", file)
+GET     /assets/avatars             @controllers.AssetController.avatars()
+GET     /assets/avatars/*file       controllers.Assets.at(path="/public/images/avatars", file)
 
 # Channels API
-GET     /channels/                  @controllers.ChannelController.readAll
-PUT     /channels/                  @controllers.ChannelController.create
+GET     /channels                  @controllers.ChannelController.readAll
+PUT     /channels/                 @controllers.ChannelController.create
 
-GET     /channels/{id}/             @controllers.ChannelController.read(id)
-POST    /channels/{id}/             @controllers.ChannelController.subscribe(id)
+GET     /channels/:id              @controllers.ChannelController.read(id: Long)
+POST    /channels/:id              @controllers.ChannelController.subscribe(id)
 
 # Users API
-POST    /users/                     @controllers.UserController.login
-PUT     /users/                     @controllers.UserController.create
+POST    /users                     @controllers.UserController.login
+PUT     /users                     @controllers.UserController.create
+
+GET     /chat/:uuid                @controllers.MessageController.chat(uuid: String)
+GET     /emoticons                  @controllers.MessageController.emoticons

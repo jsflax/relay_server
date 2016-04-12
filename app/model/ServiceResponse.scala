@@ -16,7 +16,6 @@ object StatusCode extends Enumeration {
 }
 
 import model.StatusCode._
-import play.api.libs.json.Writes
 
 /**
   * Main envelope to be passed around from service to controller,

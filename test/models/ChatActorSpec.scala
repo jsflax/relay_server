@@ -40,15 +40,15 @@ class ChatActorSpec extends Specification {
       ChatActor.parseEmoticons("foo bar")._2 must beEmpty
     }
     "return [bar]" in {
-      ChatActor.parseEmoticons("foo (bar)")._2 must beEqualTo(Seq("(bar)"))
+      ChatActor.parseEmoticons("foo (bar)")._2 must beEqualTo(Seq("bar"))
     }
     "return [bar, baz]" in {
       ChatActor.parseEmoticons("foo (bar) (baz)")._2 must
-        beEqualTo(Seq("(bar)", "(baz)"))
+        beEqualTo(Seq("bar", "baz"))
     }
     "return [qux]" in {
       ChatActor.parseEmoticons("foo (bar baz) (qux)")._2 must
-        beEqualTo(Seq("(qux)"))
+        beEqualTo(Seq("qux"))
     }
   }
 

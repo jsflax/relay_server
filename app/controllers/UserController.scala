@@ -16,7 +16,7 @@ class UserController extends BaseController {
 
   def login = Action(parse.json) { implicit request =>
     validateModelAndFetchResult[UserLoginRequest, User](
-      UserService.readByEmailAndPassword
+      UserService.readByNameAndPassword
     )
   }
 }

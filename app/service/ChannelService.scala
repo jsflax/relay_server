@@ -56,7 +56,7 @@ object ChannelService {
       }.updateAndReturnGeneratedKey().apply()
     )
 
-  def read(channelId: String): ServiceResponse[Channel] = {
+  def read(channelId: Long): ServiceResponse[Channel] = {
     val channelOpt = withSQL {
       select.from(ChannelProtocol as c).where.eq(c.id, channelId)
     }.map(rs => ChannelProtocol(rs)).single().apply()

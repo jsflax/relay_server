@@ -27,8 +27,7 @@ object UserService {
   sql"""
       CREATE TABLE IF NOT EXISTS user (
         id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        name VARCHAR(30) NOT NULL,
-        email VARCHAR(50) UNIQUE NOT NULL,
+        name VARCHAR(50) UNIQUE NOT NULL,
         date_created BIGINT,
         avatar_url VARCHAR(255),
         hash VARCHAR(255) NOT NULL
@@ -70,15 +69,13 @@ object UserService {
   }
 
   lazy val defaultAvatars = listFiles(
-    new File("./public/images")
-  ).filter(
-    _.getName.startsWith("dart_monkey")
-  ).map(name => s"assets/images/${name.getName}")
+    new File("./public/images/avatars")
+  ).map(name => s"/assets/avatars/${name.getName}")
 
 
   def create(user: UserCreateRequest): ServiceResponse[Option[User]] = {
     withSQL {
-      select.from(UserProtocol as u).where.eq(u.email, user.email)
+      select.from(UserProtocol as u).where.eq(u.name, user.name)
     }.map(rs => UserProtocol(rs)).single().apply() match {
       case Some(_) =>
         ServiceResponse[Option[User]](
@@ -99,8 +96,7 @@ object UserService {
               .into(UserProtocol)
               .namedValues(
                 column.name -> user.name,
-                column.email -> user.email,
-                column.avatarUrl -> avatarUrl,
+                column.avatarUrl -> user.avatarUrl.getOrElse(avatarUrl),
                 column.hash -> pwHash
               )
           }.updateAndReturnGeneratedKey().apply() match {
@@ -109,8 +105,7 @@ object UserService {
                 User(
                   l,
                   user.name,
-                  user.email,
-                  avatarUrl,
+                  user.avatarUrl.getOrElse(avatarUrl),
                   pwHash,
                   TokenService.create(l)
                 )
@@ -133,7 +128,7 @@ object UserService {
       case Some(value) =>
         ServiceResponse(
           StatusCode.OK,
-          read(value.userId)
+          value
         )
       case None =>
         ServiceResponse[User](
@@ -142,12 +137,12 @@ object UserService {
         )
     }
 
-  def readByEmailAndPassword(params: UserLoginRequest): ServiceResponse[User] =
+  def readByNameAndPassword(params: UserLoginRequest): ServiceResponse[User] =
     withSQL {
       select
         .from(UserProtocol as u)
         .join(Token as t)
-        .where.eq(u.email, params.email)
+        .where.eq(u.name, params.name)
         .and.eq(u.id, t.userId)
     }.map(rs => UserProtocol(rs)).single().apply() match {
       case Some(user) =>
