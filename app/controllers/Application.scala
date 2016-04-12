@@ -28,7 +28,7 @@ object SqlDB {
       warningLogLevel = 'warn
     )
 
-    val dbUri = new URI(System.getenv("JAWSDB_URL"))
+    val dbUri = new URI(System.getenv("CLEARDB_DATABASE_URL"))
 
     val username = dbUri.getUserInfo.split(":")(0)
     val password = dbUri.getUserInfo.split(":")(1)
