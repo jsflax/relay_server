@@ -12,7 +12,8 @@ object ChannelService {
   private lazy val column = ChannelProtocol.column
   private lazy val c = ChannelProtocol.c
 
-  sql"""
+  try {
+    sql"""
         CREATE TABLE IF NOT EXISTS channel (
           id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
           creator_id INT NOT NULL,
@@ -22,7 +23,7 @@ object ChannelService {
         )
     """.execute().apply()
 
-  sql"""
+    sql"""
         CREATE TABLE IF NOT EXISTS channel_user_admins (
           id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
           channel_id INT,
@@ -30,20 +31,23 @@ object ChannelService {
         )
     """.execute().apply()
 
-  sql"""
+    sql"""
         SHOW TRIGGERS LIKE 'channel'
     """.map(rs => rs).list.apply().isEmpty match {
-    case true =>
-      sql"""
+      case true =>
+        sql"""
        CREATE TRIGGER on_channel_created
        BEFORE INSERT ON channel
        FOR EACH ROW
        SET
         new.date_created = UNIX_TIMESTAMP(NOW())
       """.execute().apply()
+      case _ =>
+    }
+  } catch {
     case _ =>
   }
-
+  
   def create(channel: ChannelCreateRequest): ServiceResponse[Channel] = {
     TokenService.findByToken(channel.token) match {
       case Some(user) =>
