@@ -56,6 +56,55 @@ def parseEmoticons(rawContent: String): (String, Seq[String]) = {
 
 Any URLs contained in the message, along with the page's title.
 
+```scala
+def parseLinks(rawContent: String): (String, Seq[Link]) = {
+    val linkRegex = "(https?:\\/\\/(?:www\\.|(?!www))[^\\s\\.]+\\.[^\\s]{2,}|www\\.[^\\s]+\\.[^\\s]{2,})".r
+
+    var idx = -1
+    val buffer = ListBuffer[Link]()
+
+    (linkRegex.replaceAllIn(rawContent, r => {
+      buffer += Link(r.matched, parseHtmlTitle(r.matched))
+      idx += 1
+      s"\\$$l$idx"
+    }), buffer)
+}
+```
+
+### All together now
+
+Content is then generated using the following method.
+
+```scala
+def generateMessageResponse(messageRequest: MessageRequest):
+  MessageResponse = {
+
+    val (rawStrippedMentions, mentions) =
+      parseMentions(messageRequest.rawContent)
+
+    val (rawStrippedMentionsAndEmoticons, emoticons) =
+      parseEmoticons(rawStrippedMentions)
+
+    val (rawStrippedFinal, links) =
+      parseLinks(rawStrippedMentionsAndEmoticons)
+
+    MessageResponse(
+      messageRequest.channelId,
+      messageRequest.userId,
+      messageRequest.rawContent,
+      mentions,
+      emoticons,
+      links,
+      rawStrippedFinal,
+      messageRequest.username,
+      messageRequest.avatarUrl,
+      messageRequest.time
+    )
+}
+```
+
+It is rendered as such.
+
 ```json
 {
 	"channelId":1,
