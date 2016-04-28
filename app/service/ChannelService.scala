@@ -47,7 +47,7 @@ object ChannelService {
   } catch {
     case _ =>
   }
-  
+
   def create(channel: ChannelCreateRequest): ServiceResponse[Channel] = {
     TokenService.findByToken(channel.token) match {
       case Some(user) =>
